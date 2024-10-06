@@ -1,4 +1,0 @@
-[default]
-ALLOWED_ORIGINS = []
-MONGO_DSN = "mongodb://mongodb:27017/MealPlannerDB"
-ELASTICSEARCH = "elasticsearch://elasticsearch:9200?cluster.name=MealRecipeCluster&ssl=true"

@@ -1,14 +1,39 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.8
+# # Use the official Python image
+# FROM python:3.9-slim
 
-WORKDIR /dir
-COPY ./requirements.txt /dir/requirements.txt
-RUN pip install -r /dir/requirements.txt
+# # Set the working directory
+# WORKDIR /app
 
-COPY ./app /dir/app
-COPY ./config /dir/config
-COPY ./main.py /dir/main.py
-COPY ./Makefile /dir/Makefile
+# # Copy the requirements file into the container
+# COPY requirements.txt .
 
-EXPOSE 80
+# # Install the dependencies
+# RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["make", "start"]
+# # Copy the rest of the application code
+# COPY . .
+
+# # Expose the port the app runs on
+# EXPOSE 5000
+
+# # Command to run the application
+# CMD ["python", "app.py"]
+
+# Dockerfile
+
+FROM python:3.9
+
+# Set the working directory
+WORKDIR /app
+
+# Copy requirements.txt
+COPY requirements.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of your application code
+COPY . .
+
+# Command to run the application
+CMD ["python", "app.py"]
