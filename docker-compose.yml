@@ -1,46 +1,21 @@
-version: '3'
+version: '3.8'
+
 services:
-  # For mac
-  mongodb:
-    image: arm64v8/mongo
-    environment:
-      ALLOW_EMPTY_PASSWORD: "yes"
-    restart: unless-stopped
+  web:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "5101:5101"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
     ports:
       - "27017:27017"
     volumes:
-      - mongodb:/arm64v8/mongodb
-  
-  # For window/linux
-  # mongodb:
-  #   image: bitnami/mongodb
-  #   environment:
-  #     ALLOW_EMPTY_PASSWORD: "yes"
-  #   restart: unless-stopped
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongodb:/bitnami/mongodb
-
-  elasticsearch:
-    image: bitnami/elasticsearch:latest
-    environment:
-      - cluster.name=MealRecipeCluster
-    ports:
-      - "9200:9200"
-    volumes:
-      - elasticsearch:/bitnami/elasticsearch
-
-  mealplanner:
-    build: .
-    environment:
-      - JWT_ALGORITHM
-      - JWT_SECRET_KEY
-    depends_on:
-      - mongodb
-    ports:
-      - "8080:80"
+      - mongo-data:/data/db
 
 volumes:
-  mongodb:
-  elasticsearch:
+  mongo-data:
