@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 from app.dto.common import BaseResponseData
 from app.models.user_account import Gender
@@ -17,8 +17,8 @@ class SignUpRequest(BaseModel):
     height: Optional[float]
     age: date
     gender: Optional[Gender]
-    allergies: list[str]
-    dietary_preferences: list[str]
+    allergies: List[str]
+    dietary_preferences: List[str]
     profile_picture: Optional[str]
 
 class EditRequest(BaseModel):
@@ -27,8 +27,8 @@ class EditRequest(BaseModel):
     height: Optional[float]
     age: date
     gender: Optional[Gender]
-    allergies: list[str]
-    dietary_preferences: list[str]
+    allergies: List[str]
+    dietary_preferences: List[str]
     profile_picture: Optional[str]
 
 class LoginResponseData(BaseModel):
@@ -44,8 +44,8 @@ class UserResponseData(BaseModel):
     height: Optional[float]
     age: date
     gender: Optional[Gender]
-    allergies: list[str]
-    dietary_preferences: list[str]
+    allergies: List[str]
+    dietary_preferences: List[str]
     profile_picture: Optional[str]
     created_at: datetime
     updated_at: datetime

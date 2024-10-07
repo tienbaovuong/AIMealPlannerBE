@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 from pymongo import ASCENDING, IndexModel
 
 from app.models.base import RootModel, RootEnum
@@ -28,6 +28,6 @@ class UserAccount(RootModel):
     height: Optional[float] # cm
     date_of_birth: date #YYYY-MM-DD
     gender: Optional[Gender] # MALE, FEMALE or OTHER(null)
-    allergies: list[str]
-    dietary_preferences: list[str]
+    allergies: List[str]
+    dietary_preferences: List[str]
     profile_picture: Optional[str] # Profile id
