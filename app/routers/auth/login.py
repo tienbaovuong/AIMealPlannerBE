@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.dto.common import BaseResponse
-from app.dto.auth_dto import LoginRequest, LoginResponseData, LoginResponse, SignUpRequest, UserResponse
+from app.dto.auth_dto import LoginRequest, LoginResponseData, LoginResponse, SignUpRequest, UserResponse, EditRequest
 from app.services.account_services import AuthService
 from app.helpers.auth_helpers import get_current_user
 
@@ -33,9 +33,7 @@ async def user_signup(
     data: SignUpRequest
 ):
     await AuthService.signup(
-        user_name=data.user_name,
-        email=data.email,
-        password=data.password
+        request=data
     )
     return BaseResponse(
         message='Succeed',
@@ -44,7 +42,7 @@ async def user_signup(
 
 
 @router.get(
-    '/user',
+    '/profile',
     response_model=UserResponse
 )
 async def get_current_user(
@@ -55,3 +53,18 @@ async def get_current_user(
         message='Succeed',
         data=user
     )
+
+
+@router.put(
+    '/edit',
+    response_model=BaseResponse
+)
+async def edit_current_user(
+    edit_request: EditRequest,
+    user_id: str = Depends(get_current_user),
+):
+    await AuthService.edit_user(user_id, edit_request.dict())
+    return BaseResponse(
+        message='Edited user profiled successfully',
+    )
+

@@ -5,7 +5,7 @@ from beanie import PydanticObjectId
 from pymongo.errors import DuplicateKeyError
 
 from app.models.user_account import UserAccount
-from app.dto.auth_dto import UserResponseData
+from app.dto.auth_dto import SignUpRequest, UserResponseData
 from app.helpers.exceptions import NotFoundException, BadRequestException, PermissionDeniedException
 from app.helpers.auth_helpers import login_token
 
@@ -21,15 +21,22 @@ class AuthService:
         if user.password != hashlib.sha256(password.encode()).hexdigest():
             raise PermissionDeniedException("Wrong email or password")
         access_token = login_token(str(user.id))
-        _logger.info(f"User logged in: {user.user_name}")
+        _logger.info(f"User logged in: {user.name}")
         return access_token
     
     @staticmethod
-    async def signup(user_name: str, email: str, password: str) -> UserAccount:
+    async def signup(request: SignUpRequest) -> UserAccount:
         new_user = UserAccount(
-            user_name=user_name,
-            email=email,
-            password=hashlib.sha256(password.encode()).hexdigest(),
+            name=request.name,
+            email=request.email,
+            password=hashlib.sha256(request.password.encode()).hexdigest(),
+            weight=request.weight,
+            height=request.height,
+            age=request.age,
+            gender=request.gender,
+            allergies=request.allergies,
+            dietary_preferences=request.dietary_preferences,
+            profile_picture=request.profile_picture,
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
@@ -37,7 +44,7 @@ class AuthService:
             await new_user.save()
         except DuplicateKeyError:
             raise BadRequestException("Email already registered")
-        _logger.info(f"New user created: {new_user.user_name}")
+        _logger.info(f"New user created: {new_user.name}")
         return new_user
     
     @staticmethod
@@ -46,3 +53,13 @@ class AuthService:
         if not user:
             raise NotFoundException(f"User not found")
         return user
+    
+    @staticmethod
+    async def edit_user(user_id: str, request: dict):
+        user = await UserAccount.find_one({"_id": PydanticObjectId(user_id)})
+        if not user:
+            raise NotFoundException(f"User not found")
+        
+        # Update query
+        request.update({"updated_at": datetime.now()})
+        await user.update({"$set": request})
