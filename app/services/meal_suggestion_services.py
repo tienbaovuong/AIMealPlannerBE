@@ -20,34 +20,28 @@ class MealSuggestionService:
         query = f"Find meal for the user, their allergies are {user.allergies} and their calories limit are {calories}"
 
         # Retrieval
-        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids)
+        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
 
         # Parse
         parse_meals = []
         for meal in meals:
-            parse_meal = meal.metadata
-            parse_meal["id"] = meal.id
-            parse_meals.append(parse_meal)
-            user_seen_meals.seen_meals.append(meal.id)
+            parse_meals.append(meal.metadata)
+            user_seen_meals.seen_meals.append(meal.metadata["id"])
 
         await user_seen_meals.save()
         return parse_meals
     
     @staticmethod
     async def suggestion_meal():
-        meals = await vector_store.asimilarity_search(query="", k=3)
+        meals = await vector_store.asimilarity_search(query="food", k=3)
         parse_meals = []
         for meal in meals:
-            parse_meal = meal.metadata
-            parse_meal["id"] = meal.id
-            parse_meals.append(parse_meal)
+            parse_meals.append(meal.metadata)
         return parse_meals
 
     @staticmethod
     async def get_meal_recipe_by_id(meal_id: str) -> dict:
-        meal = await vector_store.asimilarity_search(query="", k=1, filter=[{"query": {"ids": {"values": [meal_id]}}}])
+        meal = await vector_store.asimilarity_search(query="food", k=1, filter=[{"query": {"ids": {"values": [meal_id]}}}])
         if not meal:
             raise NotFoundException("Meal not found")
-        meal_with_id = meal[0].metadata
-        meal_with_id["id"] = meal[0].id
-        return meal_with_id
+        return meal[0].metadata

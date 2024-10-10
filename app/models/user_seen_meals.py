@@ -23,6 +23,6 @@ class UserSeenMeals(RootModel):
     async def find_one_or_create(user_id: str) -> "UserSeenMeals":
         user_seen_meals = await UserSeenMeals.find_one({"user_id": user_id})
         if not user_seen_meals:
-            user_seen_meals = UserSeenMeals(user_id=user_id, seen_meals=[])
+            user_seen_meals = UserSeenMeals(user_id=user_id, seen_meals=[], created_at=datetime.now(), updated_at=datetime.now())
             user_seen_meals = await user_seen_meals.save()
         return user_seen_meals

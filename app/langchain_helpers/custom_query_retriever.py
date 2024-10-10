@@ -10,6 +10,7 @@ from langchain.retrievers.self_query.base import SelfQueryRetriever
 from langchain_openai import ChatOpenAI
 
 from app.settings.app_settings import AppSettings
+from app.models.user_seen_meals import UserSeenMeals
 
 logger = logging.getLogger(__name__)
 class CustomSelfQueryRetriever(SelfQueryRetriever):
@@ -46,6 +47,11 @@ class CustomSelfQueryRetriever(SelfQueryRetriever):
         if (len(docs) == 0 and exclude_ids):
             logger.info(f"No documents found, retry with no ids filter")
             search_kwargs["filter"].pop()
+            # Reset user seen meal
+            user_id = kwargs.pop("user_id", None)
+            if user_id:
+                user_seen_meals = UserSeenMeals.find_one({"user_id": user_id})
+                await user_seen_meals.delete()
             docs = await self._aget_docs_with_query(new_query, search_kwargs)
         return docs
     

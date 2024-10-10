@@ -9,7 +9,7 @@ class BaseResponse(BaseModel):
 
 
 class BaseResponseData(BaseResponse):
-    data: Union[dict, str, int, None]
+    data: Union[dict, str, int, List[dict], None]
 
 
 class BasePaginationResponseData(BaseModel):
