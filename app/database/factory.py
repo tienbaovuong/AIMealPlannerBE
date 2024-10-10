@@ -54,11 +54,7 @@ async def initialize():
     await init_beanie(
         client.get_database(),
         document_models=[
-            UserAccount,
-            Library,
-            Question,
-            CarRace,
-            CarRaceSession
+            UserAccount
         ],
     )
 

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, List
 
@@ -15,7 +15,7 @@ class SignUpRequest(BaseModel):
     email: str
     weight: Optional[float]
     height: Optional[float]
-    age: date
+    date_of_birth: datetime
     gender: Optional[Gender]
     allergies: List[str]
     dietary_preferences: List[str]
@@ -25,7 +25,7 @@ class EditRequest(BaseModel):
     name: str
     weight: Optional[float]
     height: Optional[float]
-    age: date
+    date_of_birth: datetime
     gender: Optional[Gender]
     allergies: List[str]
     dietary_preferences: List[str]
@@ -42,7 +42,7 @@ class UserResponseData(BaseModel):
     email: str
     weight: Optional[float]
     height: Optional[float]
-    age: date
+    date_of_birth: datetime
     gender: Optional[Gender]
     allergies: List[str]
     dietary_preferences: List[str]

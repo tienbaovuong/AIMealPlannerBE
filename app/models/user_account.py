@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 from typing import Optional, List
 from pymongo import ASCENDING, IndexModel
 
@@ -26,7 +26,7 @@ class UserAccount(RootModel):
     password: str
     weight: Optional[float] # kg
     height: Optional[float] # cm
-    date_of_birth: date #YYYY-MM-DD
+    date_of_birth: datetime #YYYY-MM-DD
     gender: Optional[Gender] # MALE, FEMALE or OTHER(null)
     allergies: List[str]
     dietary_preferences: List[str]

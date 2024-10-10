@@ -32,7 +32,7 @@ class AuthService:
             password=hashlib.sha256(request.password.encode()).hexdigest(),
             weight=request.weight,
             height=request.height,
-            age=request.age,
+            date_of_birth=request.date_of_birth,
             gender=request.gender,
             allergies=request.allergies,
             dietary_preferences=request.dietary_preferences,

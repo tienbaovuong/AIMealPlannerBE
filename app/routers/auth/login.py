@@ -45,7 +45,7 @@ async def user_signup(
     '/profile',
     response_model=UserResponse
 )
-async def get_current_user(
+async def get_user(
     user_id: str = Depends(get_current_user),
 ):
     user = await AuthService.get_user_by_id(user_id)
