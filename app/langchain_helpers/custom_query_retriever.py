@@ -13,6 +13,9 @@ from app.settings.app_settings import AppSettings
 from app.models.user_seen_meals import UserSeenMeals
 
 logger = logging.getLogger(__name__)
+search_k = 3
+score_threshold = 0.6
+
 class CustomSelfQueryRetriever(SelfQueryRetriever):
     def _get_relevant_documents(self, query, run_manager, **kwargs) -> List[Document]:
         structured_query = self.query_constructor.invoke(
@@ -44,8 +47,8 @@ class CustomSelfQueryRetriever(SelfQueryRetriever):
                 search_kwargs["filter"] = []
             search_kwargs["filter"].append(exclude_ids_query)
         docs = await self._aget_docs_with_query(new_query, search_kwargs)
-        if (len(docs) == 0 and exclude_ids):
-            logger.info(f"No documents found, retry with no ids filter")
+        if (len(docs) < search_k and exclude_ids):
+            logger.info(f"Not enough documents found, retry with no ids filter")
             search_kwargs["filter"].pop()
             # Reset user seen meal
             user_id = kwargs.pop("user_id", None)
@@ -84,6 +87,6 @@ metadata_field_info = [
 document_content_description = "Meal recipe information"
 retriever = CustomSelfQueryRetriever.from_llm(
     llm, vector_store, document_content_description, metadata_field_info, verbose=True, use_original_query=False,
-    search_type="similarity_score_threshold", search_kwargs={"score_threshold": 0.4, "k": 3}, 
+    search_type="similarity_score_threshold", search_kwargs={"score_threshold": score_threshold, "k": search_k}, 
     _expects_other_args=True, _new_arg_supported=True
 )

@@ -1,9 +1,7 @@
-import json
 from fastapi import APIRouter, Depends, WebSocket
 
 from app.dto.chat_dto import ChatResponseData, MessageType
 from app.helpers.auth_helpers import get_current_user
-from app.helpers.exceptions import BadRequestException
 from app.services.chat_services import ChatService
 
 router = APIRouter(tags=["Chat meal suggestion"], prefix="/chat")
