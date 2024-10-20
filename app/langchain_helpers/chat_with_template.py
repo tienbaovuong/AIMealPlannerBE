@@ -1,10 +1,13 @@
-from custom_query_retriever import llm
+from app.langchain_helpers.custom_query_retriever import llm
+import logging
+
+_logger = logging.getLogger(__name__)
 
 INTENTION_TEMPLATE = """
     You are a helpful assistant. You will be given a message from user.
     Your task is to determine the intention of the user.
     The intention can ONLY be one of the following:
-    - MEAL_SUGGESTION: The user wants to get meal suggestion.
+    - MEAL_SUGGESTION: Food related topic.
     - OTHER: Anything else.
 
     Return the intention in string format.
@@ -39,6 +42,7 @@ CHAT_TEMPLATE = """
 async def get_chat_intentions(message: str):
     prompt = INTENTION_TEMPLATE.format(message=message)
     result = await llm.ainvoke(prompt)
+    _logger.info(f"Intention: {result.content}")
     return result.content
 
 async def get_chat_response(user_message: str, meal_titles: str):
@@ -48,5 +52,5 @@ async def get_chat_response(user_message: str, meal_titles: str):
 
 async def stream_chat_response(user_message: str, meal_titles: str):
     prompt = CHAT_TEMPLATE.format(user_message=user_message, meal_titles=meal_titles)
-    async for chunk in await llm.astream(prompt):
+    async for chunk in llm.astream(prompt):
         yield chunk.content

@@ -14,19 +14,21 @@ async def connect_chat(websocket: WebSocket, user_id: str = Depends(get_current_
 
     # Get history and send to client
     history = await ChatService.get_history(user_id)
+    history_dict = []
+    for msg in history:
+        history_dict.append(msg.dict())
+
     await websocket.send_json(
         {
             "messageType": "HISTORY",
-            "message": history,
+            "message": history_dict,
         }
     )
     await websocket.send_json(
-        {
-            ChatResponseData(
-                message="Hi, how can I help you today?",
-                messageType=MessageType.BOT_TEXT,
-            ).dict()
-        }
+        ChatResponseData(
+            message="Hi, how can I help you today?",
+            messageType=MessageType.BOT_TEXT,
+        ).dict()
     )
 
     # Wait for message from client
@@ -48,19 +50,21 @@ async def connect_chat_stream(websocket: WebSocket, user_id: str = Depends(get_c
 
     # Get history and send to client
     history = await ChatService.get_history(user_id)
+    history_dict = []
+    for msg in history:
+        history_dict.append(msg.dict())
+        
     await websocket.send_json(
         {
             "messageType": "HISTORY",
-            "message": history,
+            "message": history_dict,
         }
     )
     await websocket.send_json(
-        {
-            ChatResponseData(
-                message="Hi, how can I help you today?",
-                messageType=MessageType.BOT_TEXT,
-            ).dict()
-        }
+        ChatResponseData(
+            message="Hi, how can I help you today?",
+            messageType=MessageType.BOT_TEXT,
+        ).dict()
     )
 
     # Wait for message from client

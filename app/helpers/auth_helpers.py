@@ -2,7 +2,7 @@ import os
 import jwt
 import time
 
-from fastapi import Depends
+from fastapi import Depends, Request, WebSocket
 from fastapi.security import OAuth2PasswordBearer
 
 from app.helpers.exceptions import PermissionDeniedException
@@ -47,11 +47,15 @@ def login_token(user_id: str):
     payload = {
         "sub": "admin",
         "id": user_id,
-        "exp": round(time.time()) + 86400, # 1 hour expire
+        "exp": round(time.time()) + 86400, # 1 day expire
     }
     return generate_token(payload, default_secret_key)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):
+    async def __call__(self, request: Request = None, websocket: WebSocket = None):
+        return await super().__call__(request or websocket)
+
+oauth2_scheme = CustomOAuth2PasswordBearer(tokenUrl="token")
     
 def get_current_user(token: str= Depends(oauth2_scheme)):
     user = decode_token(token)

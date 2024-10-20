@@ -66,7 +66,7 @@ vector_store = ElasticsearchStore(
 )
 
 # Get Llama LLM
-llm = ChatOpenAI(openai_api_base="https://api.llama-api.com", model="llama3.1-70b")
+llm = ChatOpenAI(openai_api_base="https://api.llama-api.com", model="llama3-70b")
 
 # Create self query retriever
 metadata_field_info = [

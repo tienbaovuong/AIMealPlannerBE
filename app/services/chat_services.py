@@ -1,10 +1,11 @@
 import logging
 from typing import List
+from datetime import datetime
 
 from app.dto.chat_dto import ChatResponseData
-from app.helpers.exceptions import NotFoundException, BadRequestException, PermissionDeniedException
 from app.langchain_helpers.custom_query_retriever import retriever
 from app.models.chat_history import ChatHistory, MessageType
+from app.models.user_seen_meals import UserSeenMeals
 from app.services.account_services import AuthService
 from app.helpers.calories_calculator import calories_calculator
 from app.langchain_helpers.chat_with_template import get_chat_response, stream_chat_response, get_chat_intentions
@@ -14,16 +15,25 @@ _logger = logging.getLogger(__name__)
 class ChatService:
 
     @staticmethod
+    async def get_all_by_user_id(user_id: str) -> List[ChatResponseData]:
+        query = ChatHistory.find({"user_id": user_id})
+        return await query.sort(ChatHistory.created_at).project(ChatResponseData).to_list()
+
+    @staticmethod
     async def get_history(user_id: str) -> List[ChatResponseData]:
-        return await ChatHistory.get_all_by_user_id(user_id)
+        return await ChatService.get_all_by_user_id(user_id)
     
     @staticmethod
     async def save_history(user_id: str, messages: List[dict]):
         for message in messages:
             await ChatHistory.create(
-                user_id=user_id,
-                message=message["message"],
-                message_type=message["messageType"],
+                ChatHistory(
+                    user_id=user_id,
+                    message=message["message"],
+                    messageType=message["messageType"],
+                    created_at=datetime.now(),
+                    updated_at=datetime.now(),
+                )
             )
     
     @staticmethod
@@ -47,11 +57,21 @@ class ChatService:
 
         # Preprocess
         user = await AuthService.get_user_by_id(user_id)
+        user_seen_meals = await UserSeenMeals.find_one_or_create(user_id)
+        exclude_ids = user_seen_meals.seen_meals
         calories = calories_calculator(user)
         query = f"Find meal for the user, their allergies are {user.allergies} and their calories limit are {calories}, user request: {user_message}"
 
         # Retrieval
-        meals = await retriever.ainvoke(query)
+        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+
+        if len(meals) == 0:
+            return [
+                ChatResponseData(
+                    message="Sorry, I can't find any meal for you",
+                    messageType=MessageType.BOT_TEXT,
+                ).dict()
+            ]
 
         # Parse
         parse_meals = []
@@ -102,10 +122,19 @@ class ChatService:
         # Preprocess
         user = await AuthService.get_user_by_id(user_id)
         calories = calories_calculator(user)
+        user_seen_meals = await UserSeenMeals.find_one_or_create(user_id)
+        exclude_ids = user_seen_meals.seen_meals
         query = f"Find meal for the user, their allergies are {user.allergies} and their calories limit are {calories}, user request: {user_message}"
 
         # Retrieval
-        meals = await retriever.ainvoke(query)
+        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+
+        if len(meals) == 0:
+            yield ChatResponseData(
+                    message="Sorry, I can't find any meal for you",
+                    messageType=MessageType.BOT_TEXT,
+                ).dict()
+            return
 
         # Parse
         parse_meals = []
