@@ -7,6 +7,7 @@ from motor import motor_asyncio
 from app.models.user_seen_meals import UserSeenMeals
 from app.settings.app_settings import AppSettings
 from app.models.user_account import UserAccount
+from app.models.chat_history import ChatHistory
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ async def initialize():
         document_models=[
             UserAccount,
             UserSeenMeals,
+            ChatHistory
         ],
     )
 

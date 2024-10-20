@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from app.helpers.exceptions import NotFoundException, BadRequestException, PermissionDeniedException
+from app.helpers.exceptions import NotFoundException
 from app.langchain_helpers.custom_query_retriever import vector_store, retriever
 from app.models.user_seen_meals import UserSeenMeals
 from app.services.account_services import AuthService
