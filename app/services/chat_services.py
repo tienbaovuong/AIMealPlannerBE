@@ -3,7 +3,7 @@ from typing import List
 from datetime import datetime
 
 from app.dto.chat_dto import ChatResponseData
-from app.langchain_helpers.custom_query_retriever import retriever
+from app.langchain_helpers.custom_query_retriever import chat_retriever
 from app.models.chat_history import ChatHistory, MessageType
 from app.models.user_seen_meals import UserSeenMeals
 from app.services.account_services import AuthService
@@ -63,7 +63,15 @@ class ChatService:
         query = f"Find meal for the user, their allergies are {user.allergies} and their calories limit are {calories}, user request: {user_message}"
 
         # Retrieval
-        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+        retries = 0
+        while retries < 3:
+            try:
+                meals = await chat_retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+                break
+            except Exception as e:
+                retries += 1
+                meals = []
+                _logger.error(f"Error retrieving meals: {e}")
 
         if len(meals) == 0:
             return [
@@ -79,6 +87,10 @@ class ChatService:
         for meal in meals:
             parse_meals.append(meal.metadata)
             meal_titles += meal.metadata["title"] + "; "
+            user_seen_meals.seen_meals.append(meal.metadata["id"])
+        
+        # Save seen meals
+        await user_seen_meals.save()
 
         # Get chat response
         response = await get_chat_response(user_message, meal_titles)
@@ -127,8 +139,16 @@ class ChatService:
         query = f"Find meal for the user, their allergies are {user.allergies} and their calories limit are {calories}, user request: {user_message}"
 
         # Retrieval
-        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
-
+        retries = 0
+        while retries < 3:
+            try:
+                meals = await chat_retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+                break
+            except Exception as e:
+                retries += 1
+                meals = []
+                _logger.error(f"Error retrieving meals: {e}")
+        
         if len(meals) == 0:
             yield ChatResponseData(
                     message="Sorry, I can't find any meal for you",
@@ -142,6 +162,10 @@ class ChatService:
         for meal in meals:
             parse_meals.append(meal.metadata)
             meal_titles += meal.metadata["title"] + "; "
+            user_seen_meals.seen_meals.append(meal.metadata["id"])
+
+        # Save seen meals
+        await user_seen_meals.save()
 
         # Get chat response
         async for response in stream_chat_response(user_message, meal_titles):

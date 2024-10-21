@@ -14,7 +14,8 @@ from app.models.user_seen_meals import UserSeenMeals
 
 logger = logging.getLogger(__name__)
 search_k = 3
-score_threshold = 0.6
+normal_score_threshold = 0.4
+chat_score_threshold = 0.6
 
 class CustomSelfQueryRetriever(SelfQueryRetriever):
     def _get_relevant_documents(self, query, run_manager, **kwargs) -> List[Document]:
@@ -87,6 +88,12 @@ metadata_field_info = [
 document_content_description = "Meal recipe information"
 retriever = CustomSelfQueryRetriever.from_llm(
     llm, vector_store, document_content_description, metadata_field_info, verbose=True, use_original_query=False,
-    search_type="similarity_score_threshold", search_kwargs={"score_threshold": score_threshold, "k": search_k}, 
+    search_type="similarity_score_threshold", search_kwargs={"score_threshold": normal_score_threshold, "k": search_k}, 
+    _expects_other_args=True, _new_arg_supported=True
+)
+
+chat_retriever = CustomSelfQueryRetriever.from_llm(
+    llm, vector_store, document_content_description, metadata_field_info, verbose=True, use_original_query=False,
+    search_type="similarity_score_threshold", search_kwargs={"score_threshold": chat_score_threshold, "k": search_k}, 
     _expects_other_args=True, _new_arg_supported=True
 )

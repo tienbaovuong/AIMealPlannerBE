@@ -20,7 +20,15 @@ class MealSuggestionService:
         query = f"Find meal for the user, their allergies are {user.allergies} and their calories limit are {calories}"
 
         # Retrieval
-        meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+        retries = 0
+        while retries < 3:
+            try:
+                meals = await retriever.ainvoke(query, exclude_ids=exclude_ids, user_id=user_id)
+                break
+            except Exception as e:
+                retries += 1
+                meals = []
+                _logger.error(f"Error retrieving meals: {e}")
 
         # Parse
         parse_meals = []
